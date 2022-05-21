@@ -35,7 +35,7 @@ yarn-error.log*
 *.tsbuildinfo
 
 .env
-poc
+poc/node_modules
 certificates
 .env.homologacao
 .env.producao
