@@ -22,20 +22,26 @@ const axios = require('axios')
  * @type {object}
  * @property {object} calendario - Objeto com dados da expiração e criação
  * @property {number} calendario.expiracao - Tempo para expiração da cobrança
- * @property {string=} calendario.criacao - Horário da criação da cobrança
- * @property {string=} txid - Id da transaçào, caso não informado, é gerado pela
+ * @property {string} [calendario.criacao] - Horário da criação da cobrança
+ * 
+ * @property {string} [txid] - Id da transaçào, caso não informado, é gerado pela
  * GerenciaNet
- * @property {number=} revisao - Revisão da transação PIX
- * @property {object=} loc - Metadados da location da cobrança
- * @property {number=} loc.id Id da location
- * @property {string=} loc.location URL do QRCode
- * @property {string=} loc.tipoCob Tipo da cobrança
- * @property {string=} loc.criacao Data da cobrança
- * @property {string=} location URL do QRCode
- * @property {string=} status Status da cobrança
+ * @property {number} [revisao] - Revisão da transação PIX
+ * 
+ * @property {object} [loc] - Metadados da location da cobrança
+ * @property {number} loc.id Id da location
+ * @property {string} loc.location URL do QRCode
+ * @property {string} loc.tipoCob Tipo da cobrança
+ * @property {string} loc.criacao Data da cobrança
+ * 
+ * @property {string} [location] URL do QRCode
+ * 
+ * @property {string} [status] Status da cobrança
+ * 
  * @property {object} devedor - Objeto com os dados do devedor
  * @property {string} devedor.cpf - CPF do devedor
  * @property {string} devedor.nome - Nome do devedor
+ * 
  * @property {object} valor - Valor da cobrança
  * @property {string} valor.original - Valor original da cobrança, com decimal
  * separado por .
@@ -170,6 +176,8 @@ class GNTransactions {
 	 * @function askForPix
 	 * @async
 	 * @param {Cobranca} cobranca Informações da cobranca
+	 * 
+	 * @returns {Promise<Cobranca>} cobranca
 	 */
 	async askForPix(cobranca) {
 		try {
@@ -202,7 +210,52 @@ class GNTransactions {
 			 * @type {import 'axios'.AxiosResponse} Resposta da requisição
 			 */
 			const response = await axios(axiosConfig)
-			const cobranca = response.data
+			return response.data
+		} catch (error) {
+			this._token = null
+			console.log(error)
+			console.log('Ocorreu um erro')
+		}
+	}
+
+	/**
+	 * Função responsável por capturar os dados do qrcode da cobrança
+	 * 
+	 * @param {Cobranca} cobranca
+	 */
+	async getLocData(cobranca) {
+		const { id } = cobranca.loc
+		try {
+			if (!this?._token?.access_token) {
+				throw new Error('Falha ao capturar token')
+			}
+			/** 
+			 * @type {https.Agent} Agente Https com informações do certificado
+			 */
+			const agent = new https.Agent({
+				pfx: this._certificate,
+				passphrase: ''
+			})
+			/**
+			 * @type {import 'axios'.AxiosRequestConfig} Configuração do Axios
+			 */
+			const axiosConfig = {
+				method: 'GET',
+				url: this.getBaseUrl(process.env.GN_ENV) + `/v2/loc/${id}/qrcode`,
+				headers: {
+					Authorization: `Bearer ${this._token.access_token}`,
+					'Content-type': 'application/json'
+				},
+				httpsAgent: agent,
+				data: {
+					...cobranca
+				}
+			}
+			/**
+			 * @type {import 'axios'.AxiosResponse} Resposta da requisição
+			 */
+			const response = await axios(axiosConfig)
+			return response.data
 		} catch (error) {
 			this._token = null
 			console.log(error)

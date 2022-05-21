@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 require('dotenv').config({
-	path: path.resolve(__dirname, '..', '.env.homologacao')
+	path: path.resolve(__dirname, '..', '.env.producao')
 })
 
 const GNTransactions = require('./GNTransactions')
@@ -29,13 +29,18 @@ const getToken = async () => {
 
 	await gnTransaction.getToken(data)
 
-	const cobranca = await gnTransaction.askForPix({
-		calendario: { expiracao: 3600 },
-		devedor: { cpf: '44189727814', nome: 'Ariel dos Santos Nunes' },
-		valor: { original: '1.50' },
-		chave: GN_CHAVE_PIX,
-		solicitacaoPagador: 'Cobrança dos serviços prestados'
-	})
+	const cobranca = await gnTransaction.askForPix(
+		{
+			calendario: { expiracao: 3600 },
+			devedor: { cpf: '44189727814', nome: 'Ariel dos Santos Nunes' },
+			valor: { original: '1.50' },
+			chave: GN_CHAVE_PIX,
+			solicitacaoPagador: 'Cobrança dos serviços prestados'
+
+		}
+	)
+	const qrcode = await gnTransaction.getLocData(cobranca)
+	console.log(qrcode)
 }
 
 getToken()
