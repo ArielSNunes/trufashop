@@ -1,11 +1,15 @@
 import Link from "next/link"
-import { useCart } from "../context/CartContext"
+import { CartItem, useCart } from "../context/CartContext"
 
 const Navbar = () => {
 	const cart = useCart()
-	const cartItemsCount = Object.keys(cart.cart).length
+	const cartItemsCount = Object.keys(cart.cart).map((key: string) => {
+		return (cart.cart as { [key: string]: number })[key]
+	}).reduce((prev, curr) => {
+		return prev + curr
+	}, 0);
 	return (
-		<nav className="bg-white border-gray-200 px-2 sm:px-4 py-2.5">
+		<nav className="bg-white border-gray-200 mb-3 md:mb-0 px-2 sm:px-4 py-2.5 border-b">
 			<div className="container flex flex-wrap justify-center md:justify-between items-center mx-auto">
 				<Link href="/" className="flex items-center w-full">
 					<img src="/logo.png" className="mr-3 h-6 sm:h-9 cursor-pointer" alt="Flowbite Logo" />

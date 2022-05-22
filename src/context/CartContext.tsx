@@ -1,4 +1,5 @@
-import React, { createContext, FC, useContext, useState } from "react"
+import React, { createContext, FC, useContext, useEffect, useState } from "react"
+import { Product } from "../customTypes/Product"
 
 export type CartItem = {
 	id: string,
@@ -19,13 +20,24 @@ export const CartContext = createContext<CartContextType>({
 
 export const CartProvider: FC<CartProviderProps> = ({ children }) => {
 	const [cart, setCart] = useState<{ [key: string]: number }>({})
+	useEffect(() => {
+		const sessionCart = window.sessionStorage.getItem('cart')
+		if (sessionCart) {
+			setCart(JSON.parse(sessionCart))
+		}
+	}, [])
 	const addToCart = (product: CartItem) => {
 		if (product.id) {
 			const { id } = product
-			setCart(old => ({
-				...old,
-				[id]: old[id] ? old[id] + 1 : 1
-			}))
+
+			setCart(old => {
+				const newCart = {
+					...old,
+					[id]: old[id] ? old[id] + 1 : 1
+				}
+				window.sessionStorage.setItem('cart', JSON.stringify(newCart))
+				return newCart
+			})
 		}
 	}
 	return (
