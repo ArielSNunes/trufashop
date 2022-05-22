@@ -8,6 +8,7 @@ export interface ProductImage {
 }
 
 export interface Product {
+	id: string
 	price: number
 	name: string
 	image: ProductImage
