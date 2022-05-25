@@ -8,7 +8,7 @@ type ComponentProps = {
 
 const ProductComponent = ({ product }: ComponentProps) => {
 	const cart = useCart()
-	const add = () => cart.addToCart({ id: product.id, quantity: 1, product })
+	const add = () => cart.addToCart({ id: product.id, quantity: 1 })
 
 	return (
 		<div className="bg-white font-semibold text-center rounded-3xl border shadow-lg p-10 max-w-xs w-72">
