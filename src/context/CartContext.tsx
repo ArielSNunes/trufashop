@@ -6,8 +6,10 @@ export type CartItem = {
 	quantity: number
 }
 export type CartContextType = {
-	cart: {},
-	addToCart: (product: CartItem) => void
+	cart: { [key: string]: number },
+	addToCart: (product: CartItem) => void,
+	removeFromCart: (productId: string) => void,
+	updateQuantity: (productId: string, newQuantity: number) => void
 }
 export type CartProviderProps = {
 	children: React.ReactNode
@@ -15,7 +17,9 @@ export type CartProviderProps = {
 
 export const CartContext = createContext<CartContextType>({
 	cart: {},
-	addToCart: () => { }
+	addToCart: () => { },
+	removeFromCart: () => { },
+	updateQuantity: () => { }
 })
 
 export const CartProvider: FC<CartProviderProps> = ({ children }) => {
@@ -40,8 +44,39 @@ export const CartProvider: FC<CartProviderProps> = ({ children }) => {
 			})
 		}
 	}
+	const removeFromCart = (productId: string) => {
+		setCart(old => {
+			const newCart: { [key: string]: number } = {}
+			Object.keys(old).forEach(key => {
+				if (productId !== key) {
+					newCart[key] = old[key]
+				}
+			})
+			window.sessionStorage.setItem('cart', JSON.stringify(newCart))
+			return newCart
+		})
+	}
+	const updateQuantity = (productId: string, newQuantity: number) => {
+		if (newQuantity <= 0) {
+			removeFromCart(productId)
+		} else {
+			setCart(old => {
+				const newCart = { ...old }
+				if (old[productId]) {
+					old[productId] = newQuantity
+				}
+				window.sessionStorage.setItem('cart', JSON.stringify(newCart))
+				return newCart
+			})
+		}
+	}
 	return (
-		<CartContext.Provider value={{ cart, addToCart }}>
+		<CartContext.Provider value={{
+			cart,
+			addToCart,
+			removeFromCart,
+			updateQuantity
+		}}>
 			{children}
 		</CartContext.Provider>
 	)
