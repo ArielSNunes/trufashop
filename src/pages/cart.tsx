@@ -1,24 +1,19 @@
 import type { GetServerSideProps, NextPage } from 'next'
 import * as prismic from '@prismicio/client'
-import { Fragment, useEffect } from 'react'
+import { Fragment } from 'react'
 
 import { Product } from '../customTypes/Product'
 import Navbar from '../components/Navbar'
-import ProductComponent from '../components/Product'
+import Cart from '../components/Cart'
 
 type PageProps = {
 	products: Product[]
 }
-const Home: NextPage<PageProps> = ({ products }) => {
-	useEffect(() => {
-		window.sessionStorage.setItem('products', JSON.stringify(products))
-	})
+const CartPage: NextPage<PageProps> = ({ products }) => {
 	return (
 		<Fragment>
-			<Navbar page='Home' />
-			<div className="flex items-center justify-center h-screen gap-3 flex-wrap">
-				{products.map((product, i) => <ProductComponent key={i} product={product} />)}
-			</div>
+			<Navbar page='Carrinho' />
+			<Cart />
 		</Fragment>
 	)
 }
@@ -26,7 +21,6 @@ const Home: NextPage<PageProps> = ({ products }) => {
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
 	const client = prismic.createClient('https://trufashop-arielsn.prismic.io/api/v2')
 	const products = await client.getByType('product')
-
 	return {
 		props: {
 			products: products.results.map(product => ({
@@ -37,4 +31,4 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
 	}
 }
 
-export default Home
+export default CartPage
