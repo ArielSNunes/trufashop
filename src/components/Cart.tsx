@@ -1,3 +1,4 @@
+import axios from "axios"
 import { useFormik } from "formik"
 import { useEffect, useState } from "react"
 import { useCart } from "../context/CartContext"
@@ -8,20 +9,11 @@ type FormProps = {
 	cpf: string
 	nome: string,
 	telefone: string,
+	products: Array<{ item: string; qtd: number }>
 }
 const Cart = () => {
 	const cart = useCart()
 	const [productList, setProductList] = useState<Product[]>([])
-	const formikForm = useFormik<FormProps>({
-		initialValues: {
-			cpf: '',
-			nome: '',
-			telefone: ''
-		},
-		onSubmit: async (values) => {
-			console.log(values)
-		}
-	})
 	const cartItemsKeys = Object.keys(cart.cart).map((key: string) => {
 		return (cart.cart as { [key: string]: number })[key]
 	})
@@ -34,13 +26,38 @@ const Cart = () => {
 		return {
 			price: product.price,
 			key: product.id,
+			name: product.name,
 			qtd: localQtd ? localQtd : 0,
 			total: localQtd ? localQtd * product.price : 0
 		}
-	}).reduce((prev, curr) => {
-		console.log(curr)
-		return prev + curr.total
-	}, 0)
+	})
+	const cartItemsPriceTotal = cartItemsPrice.reduce((prev, curr) => prev + curr.total, 0)
+	const formikForm = useFormik<FormProps>({
+		initialValues: {
+			cpf: '',
+			nome: '',
+			telefone: '',
+			products: []
+		},
+		onSubmit: async (values) => {
+			const products = cartItemsPrice.filter(prod => {
+				return prod.qtd > 0
+			}).map(prod => ({
+				...prod,
+				price: prod.price.toFixed(2),
+				total: prod.total.toFixed(2),
+				orderTotal: cartItemsPriceTotal.toFixed(2)
+			}))
+
+			const result = await axios.post(
+				'http://localhost:3001/orders',
+				{
+					...values,
+					products
+				}
+			)
+		}
+	})
 
 	useEffect(() => {
 		const products = window.sessionStorage.getItem('products')
@@ -154,7 +171,7 @@ const Cart = () => {
 										Total
 									</div>
 									<div className="lg:px-4 lg:py-2 m-2 lg:text-lg font-bold text-center text-gray-900">
-										{Intl.NumberFormat('pr-br', { currency: 'BRL', style: 'currency' }).format(cartItemsPrice)}
+										{Intl.NumberFormat('pr-br', { currency: 'BRL', style: 'currency' }).format(cartItemsPriceTotal)}
 									</div>
 								</div>
 								<a href="#">
