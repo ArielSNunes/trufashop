@@ -1,0 +1,7 @@
+export enum OrderStatus {
+	PENDENTE = 0,
+	PEDIDO_RECEBIDO = 1,
+	AGUARDANDO_PAGAMENTO = 2,
+	CONCLUIDO = 3,
+	ERRO = 4
+}
