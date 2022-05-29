@@ -1,19 +1,22 @@
 import type { GetServerSideProps, NextPage } from 'next'
 import * as prismic from '@prismicio/client'
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
 
 import { Product } from '../customTypes/Product'
 import Navbar from '../components/Navbar'
 import Cart from '../components/Cart'
+import { OrderStatus } from '../customTypes/OrderStatus'
 
 type PageProps = {
 	products: Product[]
 }
 const CartPage: NextPage<PageProps> = ({ products }) => {
+	const [orderStatus, setOrderStatus] = useState(OrderStatus.PENDENTE)
+
 	return (
 		<Fragment>
 			<Navbar page='Carrinho' />
-			<Cart />
+			<Cart orderStatus={orderStatus} setOrderStatus={setOrderStatus} />
 		</Fragment>
 	)
 }
