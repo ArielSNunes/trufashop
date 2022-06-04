@@ -39,3 +39,5 @@ poc/node_modules
 certificates
 .env.homologacao
 .env.producao
+
+credentials.json
